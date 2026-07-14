@@ -192,6 +192,17 @@ button:active{transform:scale(0.96);}
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+
+/* ===== おくる/あつめる/1本化 追加分 ===== */
+#homeActions .bigBtn{font-size:21px;}
+#homeActions .bigBtn .ico{font-size:30px;}
+#btnSend{background:#0891B2;}
+#codeInput{width:130px;font-size:28px;font-weight:900;text-align:center;padding:10px;border:var(--line);border-radius:14px;font-family:inherit;background:#fff;color:var(--ink);letter-spacing:10px;user-select:text;-webkit-user-select:text;}
+.bigScreen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px;text-align:center;}
+#collectCode{font-size:72px;font-weight:900;letter-spacing:12px;background:#fff;border:var(--line);border-radius:24px;padding:8px 34px;box-shadow:0 6px 0 rgba(51,50,46,.25);}
+#expBarWrap{width:min(80%,420px);height:24px;background:#333;border-radius:999px;overflow:hidden;}
+#expBar{height:100%;width:0%;background:var(--play);transition:width .3s;}
+#expVideoHolder video{position:fixed;top:0;left:0;width:2px;height:2px;opacity:.01;pointer-events:none;}
 </style>
 </head>
 <body>
@@ -210,6 +221,7 @@ button:active{transform:scale(0.96);}
     <button class="bigBtn" id="btnRec"><span class="ico">🎥</span>とる</button>
     <button class="bigBtn" id="btnSlide"><span class="ico">🖼️</span>スライド</button>
     <button class="bigBtn" id="btnPlayAll" disabled><span class="ico">▶️</span>ぜんぶみる</button>
+    <button class="bigBtn" id="btnSend"><span class="ico">📤</span>おくる</button>
   </div>
 </div>
 
@@ -300,6 +312,45 @@ button:active{transform:scale(0.96);}
   </div>
 </div>
 
+<!-- ============ おくる(そうしん中) ============ -->
+<div class="screen" id="sendScreen">
+  <div class="bigScreen">
+    <div id="sendIco" style="font-size:64px;">📤</div>
+    <div id="sendMsg" style="font-size:26px;font-weight:900;line-height:1.6;">つないでいます…</div>
+  </div>
+  <div style="padding:12px 20px calc(18px + env(safe-area-inset-bottom));">
+    <button class="bigBtn" id="sendClose" style="background:#fff;color:var(--ink);display:none;"><span class="ico">↩️</span>とじる</button>
+  </div>
+</div>
+
+<!-- ============ あつめる(受信中) ============ -->
+<div class="screen" id="collectScreen">
+  <div class="head" style="display:flex;align-items:center;gap:14px;padding:14px 20px;">
+    <h2 style="font-size:22px;flex:1;">📥 あつめています</h2>
+  </div>
+  <div class="bigScreen">
+    <div style="font-size:22px;">あいことば</div>
+    <div id="collectCode">----</div>
+    <div style="font-size:22px;line-height:1.6;">ほかの iPad で<br>「おくる」を おしてね</div>
+    <div style="font-size:26px;font-weight:900;">とどいた カード: <span id="collectCount">0</span>まい</div>
+  </div>
+  <div style="display:flex;gap:16px;padding:12px 20px calc(18px + env(safe-area-inset-bottom));">
+    <button class="bigBtn" id="collectDone" style="background:var(--play);"><span class="ico">✅</span>おわる(ならべる)</button>
+  </div>
+</div>
+
+<!-- ============ 1本化(書き出し中) ============ -->
+<div class="screen" id="exportScreen" style="background:#111;">
+  <div class="bigScreen" style="color:#fff;">
+    <div style="font-size:58px;">🎬</div>
+    <div id="expMsg" style="font-size:26px;font-weight:900;">つくっています…</div>
+    <div id="expBarWrap"><div id="expBar"></div></div>
+    <div style="font-size:16px;font-weight:500;opacity:.8;">できるまで まってね<br>(とちゅうで とじないでね)</div>
+  </div>
+  <canvas id="expCanvas" style="display:none;"></canvas>
+  <div id="expVideoHolder"></div>
+</div>
+
 <!-- ============ パスコード ============ -->
 <div class="modal" id="passModal">
   <div class="modalBox" id="passBox">
@@ -319,6 +370,24 @@ button:active{transform:scale(0.96);}
     <button class="tBtn" id="teacherBack">とじる</button>
   </div>
   <div id="teacherBody">
+    <div class="tSection">
+      <h3>あいことば(おくる/あつめる で つかう4けた)</h3>
+      <div class="tRow" style="align-items:center;">
+        <input id="codeInput" inputmode="numeric" maxlength="4" placeholder="0000">
+        <button class="tBtn" id="codeSave">ほぞん</button>
+      </div>
+      <p class="tNote">「おくる」iPad と「あつめる」iPad で、この4けたを おなじ数字にします。1回 保存すれば この端末に記憶されます(校内Wi-Fiで動作)。</p>
+    </div>
+    <div class="tSection">
+      <h3>べつのiPadから あつめる</h3>
+      <div class="tRow"><button class="tBtn" id="collectStart">📥 あつめる を はじめる</button></div>
+      <p class="tNote">この iPad を「あつめるがわ」にします。ほかの iPad の子が「おくる」を おすと、動画カードが ここに 自動で ならびます。映像は 端末どうしを 直接つないで送られ、外部サーバーには 保存されません。</p>
+    </div>
+    <div class="tSection">
+      <h3>1本の動画にする</h3>
+      <div class="tRow"><button class="tBtn" id="mergeBtn">🎬 ならべた順で 1本にする</button></div>
+      <p class="tNote">カードを ならべた順に つなげて 1本の動画を つくり、写真アプリなどへ 保存します。動画の長さ分の 時間が かかります。うまくいかない端末では 下の「1本ずつ保存→iMovie」を つかってください。</p>
+    </div>
     <div class="tSection">
       <h3>スライドの表示時間(ぜんぶみる のとき)</h3>
       <div class="tRow" id="slideDurRow">
@@ -346,24 +415,69 @@ button:active{transform:scale(0.96);}
     </div>
     <div class="tSection">
       <h3>メモ</h3>
-      <p class="tNote">・パスコード初期値:1111(このプロトタイプでは固定)<br>・このプロトタイプ版のデータはページを閉じると消えます。本番版では端末内保存(IndexedDB)を実装予定です。<br>・カメラが起動しない場合は、設定 &gt; Safari &gt; カメラ の許可をご確認ください。</p>
+      <p class="tNote">・パスコード:1111<br>・カードは端末内(IndexedDB)に自動保存され、閉じても残ります(この端末のみ・外部送信なし)。<br>・「あつめる/おくる」は同じ校内Wi-Fiに2台がつながっている必要があります。<br>・カメラが起動しない場合は、設定 &gt; Safari &gt; カメラ の許可をご確認ください。</p>
     </div>
   </div>
 </div>
 
 <div id="toast"></div>
 
+<script src="peerjs.min.js"></script>
 <script>
+/* ================= 定数 ================= */
+const PEER_PREFIX = 'kuma-narabete-';
+const DEVICE_ID = localStorage.narabete_dev || (localStorage.narabete_dev = 'd'+Math.random().toString(36).slice(2,7));
+const sleep = ms => new Promise(r=>setTimeout(r, ms));
+
 /* ================= 状態 ================= */
 const state = {
   cards: [],          // {id, type:'video'|'slide', blob?, url?, thumb?, text?, color?}
-  slideDur: 5,
-  maxRec: 60,
+  slideDur: +(localStorage.narabete_slideDur||5),
+  maxRec: +(localStorage.narabete_maxRec||60),
   editingCardId: null, // とりなおし対象
   selectedCardId: null,
   passcode: '1111',
+  code: localStorage.narabete_code || '',
 };
-let idSeq = 1;
+function newId(){ const n = (+(localStorage.narabete_seq||0))+1; localStorage.narabete_seq = n; return DEVICE_ID+'-'+n; }
+
+/* ================= 端末内保存(IndexedDB) ================= */
+let _db = null;
+function db(){
+  return new Promise((res,rej)=>{
+    if(_db) return res(_db);
+    const r = indexedDB.open('narabeteMovie', 1);
+    r.onupgradeneeded = ()=>{ const d=r.result; if(!d.objectStoreNames.contains('clips')) d.createObjectStore('clips',{keyPath:'id'}); };
+    r.onsuccess = ()=>{ _db=r.result; res(_db); };
+    r.onerror = ()=>rej(r.error);
+  });
+}
+function idbPut(rec){ return db().then(d=>new Promise((res,rej)=>{ const t=d.transaction('clips','readwrite'); t.objectStore('clips').put(rec); t.oncomplete=res; t.onerror=()=>rej(t.error); })); }
+function idbDel(id){ return db().then(d=>new Promise((res,rej)=>{ const t=d.transaction('clips','readwrite'); t.objectStore('clips').delete(id); t.oncomplete=res; t.onerror=()=>rej(t.error); })); }
+function idbAll(){ return db().then(d=>new Promise((res,rej)=>{ const t=d.transaction('clips','readonly'); const q=t.objectStore('clips').getAll(); q.onsuccess=()=>res(q.result||[]); q.onerror=()=>rej(q.error); })); }
+function idbClear(){ return db().then(d=>new Promise((res,rej)=>{ const t=d.transaction('clips','readwrite'); t.objectStore('clips').clear(); t.oncomplete=res; t.onerror=()=>rej(t.error); })); }
+function saveOrder(){ try{ localStorage.narabete_order = JSON.stringify(state.cards.map(c=>c.id)); }catch(e){} }
+async function persistCard(c){
+  try{ await idbPut({ id:c.id, type:c.type, thumb:c.thumb||null, text:c.text||null, color:c.color||null, blob:c.blob||null }); }catch(e){}
+  saveOrder();
+}
+async function loadFromDB(){
+  let recs=[];
+  try{ recs = await idbAll(); }catch(e){ recs=[]; }
+  const map={};
+  recs.forEach(r=>{
+    const c={ id:r.id, type:r.type, thumb:r.thumb, text:r.text, color:r.color, blob:r.blob||null };
+    if(r.type==='video' && r.blob){ c.url = URL.createObjectURL(r.blob); }
+    map[r.id]=c;
+  });
+  let order=[];
+  try{ order = JSON.parse(localStorage.narabete_order||'[]'); }catch(e){ order=[]; }
+  const ordered=[];
+  order.forEach(id=>{ if(map[id]){ ordered.push(map[id]); delete map[id]; } });
+  Object.keys(map).forEach(id=>ordered.push(map[id]));
+  state.cards = ordered;
+  renderCards();
+}
 
 /* ================= 効果音 ================= */
 let audioCtx = null;
@@ -505,12 +619,14 @@ $('#btnPrevOk').addEventListener('click', async ()=>{
   const thumb = await makeThumb(v);
   if(state.editingCardId){
     const c = state.cards.find(x=>x.id===state.editingCardId);
-    if(c){ URL.revokeObjectURL(c.url); c.blob = pendingBlob; c.url = v.src; c.thumb = thumb; }
+    if(c){ if(c.url && c.url!==v.src) URL.revokeObjectURL(c.url); c.blob = pendingBlob; c.url = v.src; c.thumb = thumb; await persistCard(c); }
     state.editingCardId = null;
   }else{
-    state.cards.push({id:idSeq++, type:'video', blob:pendingBlob, url:v.src, thumb});
+    const c = {id:newId(), type:'video', blob:pendingBlob, url:v.src, thumb};
+    state.cards.push(c); await persistCard(c);
   }
   pendingBlob = null;
+  v.removeAttribute('src');
   sndOk(); toast('カードが できたよ!');
   renderCards(); show('homeScreen');
 });
@@ -550,14 +666,15 @@ function openSlideEditor(card){
   fitSlideText(p);
   show('slideScreen');
 }
-$('#btnSlideOk').addEventListener('click', ()=>{
+$('#btnSlideOk').addEventListener('click', async ()=>{
   const text = $('#slideInput').value.trim() || 'あ';
   if(state.editingCardId){
     const c = state.cards.find(x=>x.id===state.editingCardId);
-    if(c){ c.text = text; c.color = slideColor; }
+    if(c){ c.text = text; c.color = slideColor; await persistCard(c); }
     state.editingCardId = null;
   }else{
-    state.cards.push({id:idSeq++, type:'slide', text, color:slideColor});
+    const c = {id:newId(), type:'slide', text, color:slideColor};
+    state.cards.push(c); await persistCard(c);
   }
   sndOk(); toast('スライドが できたよ!');
   renderCards(); show('homeScreen');
@@ -589,6 +706,7 @@ function moveCard(dir){
   const j = i + dir;
   if(j<0 || j>=state.cards.length){ toast(dir<0?'いちばん まえだよ':'いちばん うしろだよ'); return; }
   [state.cards[i], state.cards[j]] = [state.cards[j], state.cards[i]];
+  saveOrder();
   sndTap(); renderCards();
   $('#cardModalTitle').textContent = `${j+1}ばんめの ${state.cards[j].type==='video'?'ムービー':'スライド'}`;
 }
@@ -608,6 +726,7 @@ $('#cmDelete').addEventListener('click', ()=>{
       const c = state.cards[i];
       if(c.url) URL.revokeObjectURL(c.url);
       state.cards.splice(i,1);
+      idbDel(c.id); saveOrder();
     }
     renderCards(); toast('けしたよ');
   };
@@ -710,12 +829,12 @@ $('#teacherBack').addEventListener('click', ()=>show('homeScreen'));
 /* 先生モード:設定 */
 $('#slideDurRow').addEventListener('click', e=>{
   const b = e.target.closest('.tBtn'); if(!b) return;
-  state.slideDur = +b.dataset.d;
+  state.slideDur = +b.dataset.d; localStorage.narabete_slideDur = state.slideDur;
   $('#slideDurRow').querySelectorAll('.tBtn').forEach(x=>x.classList.toggle('sel',x===b));
 });
 $('#maxRecRow').addEventListener('click', e=>{
   const b = e.target.closest('.tBtn'); if(!b) return;
-  state.maxRec = +b.dataset.d;
+  state.maxRec = +b.dataset.d; localStorage.narabete_maxRec = state.maxRec;
   $('#maxRecRow').querySelectorAll('.tBtn').forEach(x=>x.classList.toggle('sel',x===b));
 });
 
@@ -742,11 +861,254 @@ $('#deleteAllBtn').addEventListener('click', ()=>{
   confirmAction = ()=>{
     state.cards.forEach(c=>{ if(c.url) URL.revokeObjectURL(c.url); });
     state.cards = [];
+    idbClear(); localStorage.removeItem('narabete_order');
     renderCards(); toast('すべて削除しました');
   };
 });
 
-renderCards();
+/* ================= あいことば設定(先生モード) ================= */
+$('#codeSave').addEventListener('click', ()=>{
+  const v = ($('#codeInput').value||'').replace(/\D/g,'').slice(0,4);
+  if(v.length!==4){ toast('4けたの すうじを いれてね'); return; }
+  state.code = v; localStorage.narabete_code = v;
+  $('#codeInput').value = v;
+  sndOk(); toast('あいことばを ほぞんしました:'+v);
+});
+
+/* ================= おくる(送信側) ================= */
+const pendingAck = {};
+function showSend(msg, close, ok){
+  $('#sendMsg').innerHTML = msg.replace(/\n/g,'<br>');
+  $('#sendIco').textContent = ok ? '🎉' : (close ? '⚠️' : '📤');
+  $('#sendClose').style.display = close ? 'flex' : 'none';
+  show('sendScreen');
+}
+$('#sendClose').addEventListener('click', ()=> show('homeScreen'));
+$('#btnSend').addEventListener('click', sendToMaster);
+
+async function sendToMaster(){
+  sndTap();
+  if(!state.cards.length){ toast('おくる ムービーが ないよ'); return; }
+  const code = state.code || localStorage.narabete_code || '';
+  if(!/^\d{4}$/.test(code)){ toast('せんせいに あいことばを せっていしてもらってね'); return; }
+  if(typeof Peer === 'undefined'){ toast('つうしん機能を よみこめませんでした'); return; }
+  showSend('つないでいます…');
+  let peer, conn, finished=false;
+  const cleanup = ()=>{ try{conn&&conn.close();}catch(e){} try{peer&&peer.destroy();}catch(e){} };
+  const fail = ()=>{ if(finished) return; showSend('つながらなかったよ…\nおなじ Wi-Fi か あいことばを\nかくにんしてね', true); cleanup(); };
+  peer = new Peer({ debug:1 });
+  peer.on('error', fail);
+  peer.on('open', ()=>{
+    conn = peer.connect(PEER_PREFIX+code, { reliable:true });
+    conn.on('error', fail);
+    conn.on('data', d=>{
+      if(d && d.t==='clip-ack' && pendingAck[d.id]){ pendingAck[d.id](); delete pendingAck[d.id]; }
+    });
+    conn.on('open', ()=> runSend(conn).catch(fail));
+  });
+  const connectTimeout = setTimeout(fail, 15000);
+
+  async function runSend(conn){
+    clearTimeout(connectTimeout);
+    const cards = [...state.cards];
+    conn.send({ t:'hello', count:cards.length });
+    for(let i=0;i<cards.length;i++){
+      const c = cards[i];
+      showSend(`おくっています…\n${i+1} / ${cards.length}`);
+      if(c.type==='video'){
+        let buf = null;
+        if(c.blob) buf = await c.blob.arrayBuffer();
+        else if(c.url){ buf = await (await fetch(c.url)).arrayBuffer(); }
+        conn.send({ t:'clip', id:c.id, kind:'video', mime:(c.blob&&c.blob.type)||'video/mp4', thumb:c.thumb||null, buf });
+      }else{
+        conn.send({ t:'clip', id:c.id, kind:'slide', text:c.text, color:c.color });
+      }
+      await new Promise((res)=>{ pendingAck[c.id]=res; setTimeout(res, 30000); }); // ackまち(最大30秒)
+    }
+    conn.send({ t:'done' });
+    finished = true;
+    sndOk(); showSend('おくれたよ! 🎉', false, true);
+    setTimeout(()=>{ cleanup(); show('homeScreen'); }, 1800);
+  }
+}
+
+/* ================= あつめる(受信側) ================= */
+let rxPeer = null;
+function startCollect(){
+  const code = state.code || localStorage.narabete_code || '';
+  if(!/^\d{4}$/.test(code)){ toast('さきに あいことばを 4けた ほぞんしてね'); return; }
+  if(typeof Peer === 'undefined'){ toast('つうしん機能を よみこめませんでした'); return; }
+  stopCollect();
+  rxPeer = new Peer(PEER_PREFIX+code, { debug:1 });
+  rxPeer.on('error', (e)=>{
+    const m = (e && e.type) || '';
+    if(m==='unavailable-id') toast('その あいことばは べつの iPad が つかっています');
+    else toast('あつめるを はじめられませんでした');
+  });
+  rxPeer.on('connection', conn=>{
+    conn.on('data', async d=>{
+      if(!d) return;
+      if(d.t==='clip'){ await receiveClip(d); try{conn.send({t:'clip-ack', id:d.id});}catch(e){} }
+      else if(d.t==='done'){ try{conn.send({t:'done-ack'});}catch(e){} sndOk(); toast('とどいたよ!'); }
+    });
+  });
+  $('#collectCode').textContent = code;
+  $('#collectCount').textContent = state.cards.length;
+  show('collectScreen');
+}
+function stopCollect(){ if(rxPeer){ try{rxPeer.destroy();}catch(e){} rxPeer=null; } }
+async function receiveClip(d){
+  if(state.cards.some(c=>c.id===d.id)){ $('#collectCount').textContent = state.cards.length; return; } // 重複は無視
+  let c;
+  if(d.kind==='video'){
+    const blob = new Blob([d.buf], { type:d.mime||'video/mp4' });
+    c = { id:d.id, type:'video', blob, url:URL.createObjectURL(blob), thumb:d.thumb||null };
+  }else{
+    c = { id:d.id, type:'slide', text:d.text, color:d.color };
+  }
+  state.cards.push(c); await persistCard(c); renderCards();
+  $('#collectCount').textContent = state.cards.length;
+}
+$('#collectStart').addEventListener('click', startCollect);
+$('#collectDone').addEventListener('click', ()=>{ stopCollect(); sndTap(); show('homeScreen'); });
+
+/* ================= 1本化(canvas録画でMP4生成) ================= */
+$('#mergeBtn').addEventListener('click', runExportMovie);
+
+function drawSlideText(ctx, text, W, H){
+  text = (text||'').trim();
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  let fs = text.length<=3 ? 260 : text.length<=6 ? 170 : text.length<=10 ? 120 : 84;
+  ctx.font = '900 '+fs+'px "Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif';
+  const maxW = W*0.9, lines=[]; let line='';
+  for(const ch of text){ const t=line+ch; if(ctx.measureText(t).width>maxW && line){ lines.push(line); line=ch; } else line=t; }
+  if(line) lines.push(line);
+  const lh = fs*1.25, total = lines.length*lh; let y = H/2 - total/2 + lh/2;
+  lines.forEach(l=>{ ctx.fillText(l, W/2, y); y+=lh; });
+}
+
+function playClipToCanvas(card, ac, dest, setCur){
+  return new Promise((resolve)=>{
+    const holder = $('#expVideoHolder');
+    const v = document.createElement('video');
+    v.src = card.url; v.playsInline = true; v.setAttribute('playsinline',''); v.preload = 'auto';
+    holder.appendChild(v);
+    let src = null, done = false;
+    const finish = ()=>{ if(done) return; done=true; try{src&&src.disconnect();}catch(e){} setCur(null); try{v.pause();}catch(e){} v.remove(); resolve(); };
+    try{ src = ac.createMediaElementSource(v); src.connect(dest); }catch(e){ /* 音声取込不可でも映像は続行 */ }
+    v.onended = finish;
+    v.onerror = finish;
+    v.oncanplay = ()=>{ setCur(v); v.play().catch(()=>{}); };
+    v.onloadedmetadata = ()=>{ const d = v.duration; if(isFinite(d) && d>0) setTimeout(finish, (d+2)*1000); };
+    setTimeout(finish, 180000); // 実尺不明で固まった時の保険(3分)。実尺が分かる場合は上の行が優先
+  });
+}
+
+async function runExportMovie(){
+  sndTap();
+  const cards = [...state.cards];
+  if(!cards.length){ toast('カードが ないよ'); return; }
+  const W=1280, H=720;
+  const canvas = $('#expCanvas'); canvas.width=W; canvas.height=H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  $('#expMsg').textContent = 'じゅんびしています…';
+  $('#expBar').style.width = '0%';
+  show('exportScreen');
+
+  let ac, dest, rec, canvasStream;
+  const chunks = [];
+  try{
+    ac = new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==='suspended') await ac.resume();
+    dest = ac.createMediaStreamDestination();
+    canvasStream = canvas.captureStream(30);
+    const at = dest.stream.getAudioTracks()[0];
+    if(at) canvasStream.addTrack(at);
+    const mime = pickMime();
+    rec = new MediaRecorder(canvasStream, mime?{mimeType:mime}:undefined);
+  }catch(e){
+    try{ac&&ac.close();}catch(_){}
+    show('teacherScreen');
+    toast('この端末では 1本化できません。「1本ずつ保存→iMovie」を つかってください');
+    return;
+  }
+  rec.ondataavailable = e=>{ if(e.data && e.data.size) chunks.push(e.data); };
+  const stopped = new Promise(res=> rec.onstop = res);
+  rec.start();
+
+  let drawing = true, curVideo = null, curSlide = null;
+  function draw(){
+    if(!drawing) return;
+    ctx.fillStyle = '#000'; ctx.fillRect(0,0,W,H);
+    if(curVideo && curVideo.readyState>=2){
+      const vw=curVideo.videoWidth||W, vh=curVideo.videoHeight||H;
+      const s=Math.min(W/vw,H/vh), dw=vw*s, dh=vh*s;
+      ctx.drawImage(curVideo,(W-dw)/2,(H-dh)/2,dw,dh);
+    }else if(curSlide){
+      ctx.fillStyle=curSlide.color||'#000'; ctx.fillRect(0,0,W,H);
+      drawSlideText(ctx, curSlide.text, W, H);
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  try{
+    for(let i=0;i<cards.length;i++){
+      const c = cards[i];
+      $('#expMsg').textContent = `つくっています…  ${i+1} / ${cards.length}`;
+      $('#expBar').style.width = Math.round(i/cards.length*100)+'%';
+      if(c.type==='video' && c.url){
+        curSlide = null;
+        await playClipToCanvas(c, ac, dest, v=>{ curVideo=v; });
+        curVideo = null;
+      }else if(c.type==='slide'){
+        curVideo = null; curSlide = { text:c.text, color:c.color };
+        await sleep(state.slideDur*1000);
+        curSlide = null;
+      }
+    }
+  }catch(e){}
+
+  $('#expBar').style.width = '100%';
+  drawing = false;
+  await sleep(300);
+  try{ rec.stop(); }catch(e){}
+  await stopped;
+  try{ ac.close(); }catch(e){}
+  $('#expVideoHolder').innerHTML = '';
+
+  const outMime = (chunks[0] && chunks[0].type) || rec.mimeType || 'video/mp4';
+  const blob = new Blob(chunks, { type: outMime });
+  if(!blob.size){ show('teacherScreen'); toast('1本化に しっぱいしました。iMovie方式を おためしください'); return; }
+  await saveMovie(blob, outMime);
+}
+
+async function saveMovie(blob, mime){
+  const ext = mime.includes('mp4') ? 'mp4' : (mime.includes('webm') ? 'webm' : 'mp4');
+  const fname = 'narabete-movie.'+ext;
+  try{
+    const file = new File([blob], fname, { type: blob.type||mime });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ files:[file], title:'ならべてムービー' });
+      show('teacherScreen'); toast('ほぞんメニューを ひらきました'); return;
+    }
+  }catch(e){ if(e && e.name==='AbortError'){ show('teacherScreen'); return; } }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=fname;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  show('teacherScreen'); toast('ダウンロードしました');
+}
+
+/* ================= 初期化 ================= */
+function initTeacherUI(){
+  $('#slideDurRow').querySelectorAll('.tBtn').forEach(x=>x.classList.toggle('sel', +x.dataset.d===state.slideDur));
+  $('#maxRecRow').querySelectorAll('.tBtn').forEach(x=>x.classList.toggle('sel', +x.dataset.d===state.maxRec));
+  $('#codeInput').value = state.code || '';
+}
+initTeacherUI();
+loadFromDB();
 </script>
 </body>
 </html>
