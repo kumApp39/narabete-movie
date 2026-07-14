@@ -2,9 +2,14 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#FDF8EE">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ならべてムービー">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <title>ならべてムービー</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
@@ -39,7 +44,14 @@ button:active{transform:scale(0.96);}
 #homeHeader{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 6px;}
 #appTitle{font-size:26px;font-weight:900;letter-spacing:2px;display:flex;align-items:center;gap:10px;}
 #appTitle .logo{width:40px;height:40px;background:var(--sun);border:var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
-#gearBtn{width:56px;height:56px;border-radius:16px;font-size:26px;opacity:.55;}
+#gearBtn{width:52px;height:52px;border-radius:16px;font-size:24px;opacity:.55;}
+#headerBtns{display:flex;align-items:center;gap:10px;}
+.hBtn{
+  min-height:58px;padding:0 15px;border:var(--line);border-radius:16px;color:#fff;
+  font-size:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  box-shadow:0 4px 0 rgba(51,50,46,.28);line-height:1.05;
+}
+.hBtn .ico{font-size:22px;}
 #cardArea{flex:1;overflow-y:auto;padding:10px 20px 20px;-webkit-overflow-scrolling:touch;}
 #cardList{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;}
 .card{
@@ -69,13 +81,16 @@ button:active{transform:scale(0.96);}
 #emptyMsg{text-align:center;padding:60px 20px;font-size:22px;line-height:1.8;opacity:.6;}
 #emptyMsg .big{font-size:52px;}
 
-#homeActions{display:flex;gap:10px;padding:14px 16px calc(18px + env(safe-area-inset-bottom));}
+#homeActions{display:flex;gap:18px;padding:16px 22px calc(22px + env(safe-area-inset-bottom));}
 .bigBtn{
-  flex:1;min-height:92px;border:var(--line);border-radius:var(--radius);
-  font-size:19px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  flex:1;min-height:88px;border:var(--line);border-radius:var(--radius);
+  font-size:21px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
   box-shadow:0 6px 0 rgba(51,50,46,.3);color:#fff;
 }
 .bigBtn .ico{font-size:30px;}
+/* ホームの3大ボタン(子ども操作用に特大) */
+#homeActions .bigBtn{min-height:160px;font-size:32px;gap:10px;border-width:4px;box-shadow:0 9px 0 rgba(51,50,46,.3);}
+#homeActions .bigBtn .ico{font-size:68px;}
 #btnRec{background:var(--rec);}
 #btnSlide{background:var(--slide);}
 #btnPlayAll{background:var(--play);}
@@ -255,7 +270,11 @@ button:active{transform:scale(0.96);}
 <div class="screen active" id="homeScreen">
   <div id="homeHeader">
     <div id="appTitle"><span class="logo">🎬</span>ならべてムービー</div>
-    <button id="gearBtn" title="先生モード(長おし)">⚙️</button>
+    <div id="headerBtns">
+      <button class="hBtn" id="btnSend"><span class="ico">📤</span>おくる</button>
+      <button class="hBtn" id="btnReceive"><span class="ico">📥</span>もらう</button>
+      <button id="gearBtn" title="先生モード(長おし)">⚙️</button>
+    </div>
   </div>
   <div id="cardArea">
     <div id="emptyMsg"><span class="big">🎥</span><br>「とる」をおして<br>ムービーをつくろう!</div>
@@ -264,9 +283,7 @@ button:active{transform:scale(0.96);}
   <div id="homeActions">
     <button class="bigBtn" id="btnRec"><span class="ico">📷</span>とる</button>
     <button class="bigBtn" id="btnSlide"><span class="ico">🖼️</span>スライド</button>
-    <button class="bigBtn" id="btnPlayAll" disabled><span class="ico">▶️</span>ぜんぶみる</button>
-    <button class="bigBtn" id="btnSend"><span class="ico">📤</span>おくる</button>
-    <button class="bigBtn" id="btnReceive"><span class="ico">📥</span>もらう</button>
+    <button class="bigBtn" id="btnPlayAll" disabled><span class="ico">▶️</span>みる</button>
   </div>
 </div>
 
